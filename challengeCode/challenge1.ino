@@ -1,4 +1,5 @@
 //challenge 1
+#include <Servo.h>
 
 
 // black = 1
@@ -6,10 +7,15 @@
 // green = 3
 //blue = 4
 
-#define black = 1
-#define red = 2
-#define green = 3
-#define blue = 4
+#define black 1
+#define red 2
+#define green 3
+#define blue 4
+
+Servo myservo;  //create servo object to control a servo
+
+#define servoPin 2
+
 
 bool entering = true;
 int secondPrev = black;
@@ -81,6 +87,9 @@ void setup() {
 	digitalWrite(in3, LOW);
 	digitalWrite(in4, LOW);
 
+  myservo.attach(servoPin);  //attachs the servo on pin 10 to servo object
+  myservo.write(0);    //back to 0 degrees
+
   //Ultrasonic Sensor 
   pinMode(trigPin, OUTPUT); // trigger Pin for left
   pinMode(echoPin, INPUT); // echo Pin for Ultrasonic
@@ -104,7 +113,7 @@ void setup() {
 
   while (entering == true){
     gostraight();
-    checkColour();
+    checkcolour();
     if(colour != black){
       entering = false;
       secondPrev = prev;
@@ -117,22 +126,36 @@ void setup() {
 
 void loop() {
   //assume inside the ring
-  checkColour();
+  checkcolour();
 
   if(sum == 5){
     stop();
+    myservo.write(0); // reset angle to 0
+    delay(10);
+    for (int i = 0; i <= 100; i++){ // slowly close the claws by adjusting the servo
+      myservo.write(i);
+     // write the i angle to the servo
+        delay(15);
+      //delay 15ms
+    }
+    delay(100); //delay just in case
     delay(10000);
   }
 
   if(colour == secondPrev){
+    Serial.println("backup:");
     backUp(); 
   }
 
   else if(colour == prev){ // in the loop
+    Serial.println("same colour, straight:");
     gostraight();
+
   }
 
   else if(colour != prev){ // ex. were in red, now not in red and not secondPrev
+    Serial.println("new colour: straight still");
+
     secondPrev = prev;
     prev = colour;
     gostraight();
@@ -141,52 +164,6 @@ void loop() {
 
 }
 
-void checkcolour(){
-  // Read Red Pulse Width
-	redPW = getRedPW();
-	// Delay to stabilize sensor
-	delay(200);
-
-	// Read Green Pulse Width
-	greenPW = getGreenPW();
-	// Delay to stabilize sensor
-	delay(200);
-
-	// Read Blue Pulse Width
-	bluePW = getBluePW();
-	// Delay to stabilize sensor
-	delay(200);
-
-	// Print output to Serial Monitor
-	Serial.print("Red PW = ");
-	Serial.print(redPW);
-	Serial.print(" - Green PW = ");
-	Serial.print(greenPW);
-	Serial.print(" - Blue PW = ");
-	Serial.println(bluePW);
-
-  if (redPW > 500 && bluePW > 500 && greenPW > 500){
-    Serial.println("black"); 
-    colour = 1; 
-  }
-  else if (redPW < bluePW && redPW < greenPW){
-    Serial.println("red"); 
-    colour = 2;
-  }
-  else if (bluePW < redPW && bluePW < greenPW){
-    Serial.println("blue"); 
-    colour = 3; 
-  }
-  else if (greenPW < redPW && greenPW < bluePW){
-    Serial.println("green"); 
-    colour = 4; 
-  }
-
-  else{
-    colour = 5; //edge case something's wrong
-  }
-
-}
 void checkcolour(){
   // Read Red Pulse Width
 	redPW = getRedPW();
@@ -255,7 +232,7 @@ void gostraight() {
   //left motor 
 	digitalWrite(in3, HIGH);
 	digitalWrite(in4, LOW);
-	delay(200);
+	delay(50);
 }
 
 void turnleft() {
@@ -276,10 +253,10 @@ void turnleft() {
 
 
   if(randSum % 2 == 0){
-    delay(350);
+    delay(400);
   }
   else{
-    delay (500);
+    delay (600);
   }
 
 	
@@ -299,12 +276,16 @@ void backUp() {
   digitalWrite(in4, HIGH);
   digitalWrite(in3, LOW);
 
-  while(colour == prev){
-    checkColour();
-    delay(50);
-  }
-  
-  turnLeft();
+  delay(500);
+
+  digitalWrite(in1, LOW);
+  digitalWrite(in2, LOW);
+  digitalWrite(in3, LOW);
+  digitalWrite(in4, LOW);
+
+  delay(250);
+
+  turnleft();
 
   digitalWrite(in1, LOW);
   digitalWrite(in2, LOW);
