@@ -13,7 +13,8 @@ const int echoPin = 1;
 #define OE_PIN A5
 
 float duration, distance; //store the duration and distance measured by the echo pin
-
+//millis(): returns the value of the current time: call millis before and after a function that you want to measure.
+//stopwatch(): 
 
 //COLOUR SENSOR 
 // Define color sensor pins
@@ -25,12 +26,12 @@ float duration, distance; //store the duration and distance measured by the echo
 
 // Calibration Values
 // *Get these from Calibration Sketch
-int redMin = 70; // Red minimum value
-int redMax = 1400; // Red maximum value
-int greenMin = 70; // Green minimum value
-int greenMax = 1400; // Green maximum value
-int blueMin = 50; // Blue minimum value
-int blueMax = 1300; // Blue maximum value
+const int redMin = 70; // Red minimum value
+const int redMax = 1400; // Red maximum value
+const int greenMin = 70; // Green minimum value
+const int greenMax = 1400; // Green maximum value
+const int blueMin = 50; // Blue minimum value
+const int blueMax = 1300; // Blue maximum value
 
 
 // Variables for Color Pulse Width Measurements
@@ -40,6 +41,7 @@ int bluePW = 0;
 
 
 int colour; 
+int speed_motor = 100;
 
 void setup() {
 	pinMode(OE_PIN,OUTPUT);
@@ -59,11 +61,9 @@ void setup() {
 	digitalWrite(in3, LOW);
 	digitalWrite(in4, LOW);
 
-
   //Ultrasonic Sensor 
   pinMode(trigPin, OUTPUT); // trigger Pin for left
   pinMode(echoPin, INPUT); // echo Pin for Ultrasonic
-
 
   //Colour sensor 
   // Set S0 - S3 as outputs
@@ -104,12 +104,8 @@ void loop() {
   Serial.println(distance);
 	delay(100);  
 
-
-
-
-
-  //when hit wall
-  if (distance < 10){
+  //when hit wall (25cm)
+  if (distance < 30){
     Serial.println("Hit wall");
     
     stop();
@@ -117,10 +113,8 @@ void loop() {
     checkcolour(); 
 
     if (colour == 1) { //if colour == black 
-      for(int j=0; j<200; j++){
-        stop(); 
-        delay(100);
-      } 
+      Serial.println("resetting");
+      delay(5000);
     }
     else if (colour == 2){ //red 
       turnU();
@@ -134,14 +128,17 @@ void loop() {
       turnright(); 
       delay(4000);
     }
+    //hopefully never
     else {
+      Serial.println("WAIT WHY AM I HERE");
       stop(); 
     }
 
   }
   else {
+    Serial.println("going straight");
     gostraight();
-	  delay(1000);
+    delay(100);
   }
   
 }
@@ -187,6 +184,10 @@ void checkcolour(){
     colour = 4; 
   }
 
+  else{
+    colour = 5; //edge case something's wrong
+  }
+
 }
 
 void stop(){
@@ -200,8 +201,8 @@ void stop(){
 void gostraight() {
 	// Set motors to maximum speed
 	// For PWM maximum possible values are 0 to 255
-	analogWrite(enA, 255);
-	analogWrite(enB, 255);
+	analogWrite(enA, speed_motor);
+	analogWrite(enB, speed_motor);
 
 	// Turn on motor A & B
   //right motor
@@ -217,18 +218,19 @@ void gostraight() {
 void turnleft() {
 	// Set motors to maximum speed
 	// For PWM maximum possible values are 0 to 255
-	analogWrite(enA, 255);
-	analogWrite(enB, 255);
+	analogWrite(enA, speed_motor);
+	analogWrite(enB, speed_motor);
 
-  for (int i=0; i <= 50; i++){
-    // Turn on motor A & B
-    //right motor
-    digitalWrite(in1, HIGH);
-    digitalWrite(in2, LOW);
-    //left motor 
-    digitalWrite(in3, LOW);
-    digitalWrite(in4, LOW);
-  }
+
+  // Turn on motor A & B
+  //right motor
+  digitalWrite(in1, HIGH);
+  digitalWrite(in2, LOW);
+  //left motor 
+  digitalWrite(in3, LOW);
+  digitalWrite(in4, LOW);
+
+  delay(5000);
 	
 	
 }
@@ -236,36 +238,36 @@ void turnleft() {
 void turnright() {
 	// Set motors to maximum speed
 	// For PWM maximum possible values are 0 to 255
-	analogWrite(enA, 255);
-	analogWrite(enB, 255);
+	analogWrite(enA, speed_motor);
+	analogWrite(enB, speed_motor);
 
-  for (int i=0; i <= 50; i++){
-    // Turn on motor A & B
-    //right motor
-    digitalWrite(in1, LOW);
-    digitalWrite(in2, LOW);
-    //left motor 
-    digitalWrite(in3, HIGH);
-    digitalWrite(in4, LOW);
-  }
+  // Turn on motor A & B
+  //right motor
+  digitalWrite(in1, LOW);
+  digitalWrite(in2, LOW);
+  //left motor 
+  digitalWrite(in3, HIGH);
+  digitalWrite(in4, LOW);
+  delay(5000);
 	
 }
 
 void turnU() {
 	// Set motors to maximum speed
 	// For PWM maximum possible values are 0 to 255
-	analogWrite(enA, 255);
-	analogWrite(enB, 255);
+	analogWrite(enA, speed_motor);
+	analogWrite(enB, speed_motor);
 
-  for (int i=0; i <= 90; i++){
-    // Turn on motor A & B
-    //right motor
-    digitalWrite(in1, HIGH);
-    digitalWrite(in2, LOW);
-    //left motor 
-    digitalWrite(in3, LOW);
-    digitalWrite(in4, LOW);
-  }
+  // Turn on motor A & B
+  //right motor
+  digitalWrite(in1, HIGH);
+  digitalWrite(in2, LOW);
+  //left motor 
+  digitalWrite(in3, LOW);
+  digitalWrite(in4, LOW);
+
+  delay(5000);
+
 	
 }
 
